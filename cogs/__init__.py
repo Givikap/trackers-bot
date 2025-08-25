@@ -1,0 +1,3 @@
+COGS = [
+    "cogs.commands.drop"
+]

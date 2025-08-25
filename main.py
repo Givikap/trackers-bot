@@ -5,6 +5,8 @@ import logging
 import os
 from dotenv import load_dotenv
 
+from cogs import COGS
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(name)s: %(message)s",
@@ -15,10 +17,6 @@ logger = logging.getLogger("main")
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-
-COGS = [
-    "cogs.commands.drop"
-]
 
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
