@@ -8,27 +8,13 @@ from configs.role_categories import (
     TA_ROLE_CATEGORY,
     PERSONAL_ROLE_CATEGORY,
 )
+from utils import RoleMgr
 
 logger = logging.getLogger(__name__)
 
 class DropCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    def get_roles_between(self, guild: discord.Guild, role1: discord.Role, role2: discord.Role) -> list[discord.Role]:
-        lower, higher = sorted((role1.position, role2.position))
-        return [role for role in guild.roles if lower < role.position < higher]
-
-    async def drop_roles(self, roles: list[discord.Role]):
-        roles = [role for role in roles if role.members]
-
-        for role in roles:
-            members = role.members
-
-            for member in members:
-                await member.remove_roles(role)
-
-            logger.info(f"Removed {len(members)} members from '{role.name}' role.")
 
     @commands.command(name="drop-course-trackers")
     @commands.guild_only()
@@ -41,10 +27,14 @@ class DropCommands(commands.Cog):
 
         logger.info("Dropping all Course Trackers roles.")
 
-        await self.drop_roles([
+        await RoleMgr.purge([
             course_tracker_role_category,
             course_tracker_role,
-            *self.get_roles_between(guild, course_tracker_role_category, discord.utils.get(guild.roles, name=TA_ROLE_CATEGORY.name))
+            *RoleMgr.get_between(
+                guild.roles, 
+                course_tracker_role_category, 
+                discord.utils.get(guild.roles, name=TA_ROLE_CATEGORY.name)
+            )
         ])
 
         logger.info("Dropped all Course Trackers roles.")
@@ -61,12 +51,12 @@ class DropCommands(commands.Cog):
 
         logger.info("Dropping all TA roles.")
 
-        await self.drop_roles([
+        await RoleMgr.purge([
             ta_role_category,
             graduate_ta_role,
             undergraduate_ta_role,
-            *self.get_roles_between(
-                guild, 
+            *RoleMgr.get_between(
+                guild.roles, 
                 ta_role_category,
                 discord.utils.get(guild.roles, name=PERSONAL_ROLE_CATEGORY.name),
             )
