@@ -1,15 +1,11 @@
 import discord
 from discord.ext import commands
 
-import logging
-
 from configs.role_categories import (
     COURSE_TRACKER_ROLE_CATEGORY,
     TA_ROLE_CATEGORY
 )
-from utils import RoleMgr
-
-logger = logging.getLogger(__name__)
+from utils import MemberMgr
 
 class AssignCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -17,7 +13,6 @@ class AssignCommands(commands.Cog):
 
     assign = discord.SlashCommandGroup(
         name="assign", 
-        description="Assign suite of roles to the given member",
         default_member_permissions=discord.Permissions(administrator=True)
     )
 
@@ -35,7 +30,7 @@ class AssignCommands(commands.Cog):
     ):
         guild: discord.Guild = ctx.guild
 
-        await RoleMgr.assign(member, [
+        await MemberMgr.assign(member, [
             discord.utils.get(guild.roles, name=COURSE_TRACKER_ROLE_CATEGORY.name),
             discord.utils.get(guild.roles, name="Course Trackers"),
             discord.utils.get(guild.roles, name=f"{course.name} Tracker")
@@ -57,16 +52,16 @@ class AssignCommands(commands.Cog):
     ):
         guild: discord.Guild = ctx.guild
 
-        await RoleMgr.assign(member, [
+        await MemberMgr.assign(member, [
             discord.utils.get(guild.roles, name=TA_ROLE_CATEGORY.name),
             discord.utils.get(guild.roles, name=f"Graduate TAs")
         ])
 
         if course:
-            await RoleMgr.assign(member, [discord.utils.get(guild.roles, name=f"{course.name} TA")])
+            await MemberMgr.assign(member, [discord.utils.get(guild.roles, name=f"{course.name} TA")])
             
         await ctx.respond(
-            f"Assigned Undergraduate TA role to {member.mention}{f'for {course.mention}' if course else ''}", 
+            f"Assigned Undergraduate TA role to {member.mention}{f' for {course.mention}' if course else ''}", 
             ephemeral=True
         )
 
@@ -84,7 +79,7 @@ class AssignCommands(commands.Cog):
     ):
         guild: discord.Guild = ctx.guild
 
-        await RoleMgr.assign(member, [
+        await MemberMgr.assign(member, [
             discord.utils.get(guild.roles, name=TA_ROLE_CATEGORY.name),
             discord.utils.get(guild.roles, name=f"Undergraduate TAs"),
             discord.utils.get(guild.roles, name=f"{course.name} TA")
