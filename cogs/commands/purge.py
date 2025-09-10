@@ -101,7 +101,7 @@ class PurgeCommands(commands.Cog):
 
         messageables: list[discord.abc.Messageable] = [
             *guild.text_channels,
-            *getattr(await guild.active_threads(), "thread", [])
+            *getattr(await guild.active_threads(), "threads", []),
             * [
                 forum.threads
                 for forum in [
