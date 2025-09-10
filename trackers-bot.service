@@ -1,0 +1,14 @@
+[Unit]
+Description=Trackers Discord Bot
+After=network-online.target
+
+[Service]
+Restart=always
+
+User=your-username
+
+WorkingDirectory=/path/to/your/trackers-bot
+ExecStart=/path/to/your/bin/python main.py
+
+[Install]
+WantedBy=multi-user.target
