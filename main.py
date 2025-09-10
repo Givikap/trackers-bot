@@ -1,15 +1,15 @@
-import discord
-from discord.ext import commands
-
 import logging
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(name)s: %(message)s",
-    handlers=[logging.StreamHandler()]
+    handlers=[logging.StreamHandler()],
 )
 
 logger = logging.getLogger("main")
