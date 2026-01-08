@@ -1,14 +1,17 @@
-import asyncio
+import logging
 
 import discord
 from discord.ext import commands
 
 from configs.role_categories import (
+    BOTS_ROLE_CATEGORY, 
+    CLASSES_ROLE_CATEGORY,
     COURSE_TRACKER_ROLE_CATEGORY,
-    PERSONAL_ROLE_CATEGORY, 
-    TA_ROLE_CATEGORY
+    PERSONAL_ROLE_CATEGORY, TA_ROLE_CATEGORY
 )
-from utils import MemberMgr, RoleMgr
+from utils import RoleMgr
+
+logger = logging.getLogger(__name__)
 
 
 class PurgeCommands(commands.Cog):
@@ -26,6 +29,7 @@ class PurgeCommands(commands.Cog):
     )
     async def purge_course_trackers(self, ctx: discord.ApplicationContext):
         guild: discord.Guild = ctx.guild
+        await ctx.respond("Purging Course Trackers...", ephemeral=True)
 
         course_tracker_role_category = discord.utils.get(
             guild.roles, name=COURSE_TRACKER_ROLE_CATEGORY.name
@@ -46,7 +50,8 @@ class PurgeCommands(commands.Cog):
             ]
         )
 
-        await ctx.respond("Purged Course Trackers", ephemeral=True)
+        logger.info(f"Member @{ctx.author.name} purged Course Trackers")
+        await ctx.edit(content="Purged Course Trackers")
 
     @purge.command(
         name="tas",
@@ -54,6 +59,7 @@ class PurgeCommands(commands.Cog):
     )
     async def purge_tas(self, ctx: discord.ApplicationContext):
         guild: discord.Guild = ctx.guild
+        await ctx.respond("Purging TAs...", ephemeral=True)
 
         ta_role_category = discord.utils.get(
             guild.roles, name=TA_ROLE_CATEGORY.name
@@ -78,52 +84,29 @@ class PurgeCommands(commands.Cog):
             ]
         )
 
-        await ctx.respond("Purged TAs", ephemeral=True)
+        logger.info(f"Member @{ctx.author} purged TAs")
+        await ctx.edit(content="Purged TAs")
 
     @purge.command(
         name="trackers",
         description="Purge Trackers",
     )
     async def purge_trackers(self, ctx: discord.ApplicationContext):
-        await ctx.respond("Not implemented", ephemeral=True)
-
-    @purge.command(
-        name="member",
-        description="Purge the given member",
-    )
-    @discord.option("member", type=discord.SlashCommandOptionType.mentionable)
-    async def purge_user(
-        self, ctx: discord.ApplicationContext, member: discord.Member
-    ):
         guild: discord.Guild = ctx.guild
+        await ctx.respond("Purging Trackers...", ephemeral=True)
 
-        await ctx.defer(ephemeral=True)
-
-        messageables: list[discord.abc.Messageable] = [
-            *guild.text_channels,
-            *getattr(await guild.active_threads(), "threads", []),
-            * [
-                forum.threads
-                for forum in [
-                    channel
-                    for channel in guild.channels
-                    if isinstance(channel, discord.ForumChannel)
-                ]
-            ],
-        ]
-
-        for messagable in messageables:
-            total_messages_deleted = await MemberMgr.purge_in(
-                member, messagable
+        await RoleMgr.purge(
+            RoleMgr.get_between(
+                guild.roles,
+                discord.utils.get(
+                    guild.roles, name=CLASSES_ROLE_CATEGORY.name
+                ),
+                discord.utils.get(guild.roles, name=BOTS_ROLE_CATEGORY.name),
             )
-            await asyncio.sleep(0.3)
+        )
 
-            await ctx.followup.send(
-                f"Purged {total_messages_deleted} messages from {member.mention} in {messagable.mention}",
-                ephemeral=True,
-            )
-
-        await ctx.followup.send(f"Purged {member.name}", ephemeral=True)
+        logger.info(f"Member @{ctx.author.name} purged Trackers")
+        await ctx.edit(content="Purged Trackers")
 
 
 def setup(bot: commands.Bot):
